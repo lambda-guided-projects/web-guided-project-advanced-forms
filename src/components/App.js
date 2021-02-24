@@ -33,7 +33,7 @@ const initialFormErrors = {
   civil: '',
 }
 const initialFriends = []
-const initialDisabled = true
+const initialDisabled = false
 
 
 export default function App() {
@@ -92,6 +92,7 @@ export default function App() {
       role: formValues.role.trim(),
       civil: formValues.civil.trim(),
       // 🔥 STEP 7- WHAT ABOUT HOBBIES?
+      hobbies: ['hiking', 'coding', 'reading'].filter(hobby => formValues[hobby])
     }
     // 🔥 STEP 8- POST NEW FRIEND USING HELPER
     postNewFriend(newFriend)
