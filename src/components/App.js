@@ -33,7 +33,7 @@ const initialFormErrors = {
   civil: '',
 }
 const initialFriends = []
-const initialDisabled = true
+const initialDisabled = false
 
 
 export default function App() {
