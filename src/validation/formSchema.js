@@ -3,7 +3,9 @@ import * as yup from 'yup'
 
 const formSchema = yup.object().shape({
     username: yup.string()
-        .required('Username is required, please fill out.'),
+        .trim()
+        .required('Username is required, please fill out.')
+        .min(3, 'Username must be 3 characters long'),
     email: yup.string()
         .email('Must be a valid email address')
         .required('Email is required'),
@@ -16,3 +18,5 @@ const formSchema = yup.object().shape({
     reading: yup.boolean(),
     coding: yup.boolean()
 })
+
+export default formSchema
