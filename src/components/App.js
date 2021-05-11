@@ -1,6 +1,9 @@
+import axios from 'axios'
+import * as yup from 'yup'
 import React, { useState, useEffect } from 'react'
 import Friend from './Friend'
 import FriendForm from './FriendForm'
+import { schema } from '../validation/formSchema'
 // 🔥 STEP 1- CHECK THE ENDPOINTS IN THE README
 // 🔥 STEP 2- FLESH OUT FriendForm.js
 // 🔥 STEP 3- FLESH THE SCHEMA IN ITS OWN FILE
@@ -48,12 +51,18 @@ export default function App() {
   const getFriends = () => {
     // 🔥 STEP 5- IMPLEMENT! ON SUCCESS PUT FRIENDS IN STATE
     //    helper to [GET] all friends from `http://buddies.com/api/friends`
+    axios.get("http://buddies.com/api/friends")
+    .then(({data}) => setFriends(data))
+    .catch(err => console.log('Error getting friends:', err))
   }
 
   const postNewFriend = newFriend => {
     // 🔥 STEP 6- IMPLEMENT! ON SUCCESS ADD NEWLY CREATED FRIEND TO STATE
     //    helper to [POST] `newFriend` to `http://buddies.com/api/friends`
     //    and regardless of success or failure, the form should reset
+    axios.post('http://buddies.com/api/friends', newFriend)
+    .then(({data}) => setFriends([data, ...friends]))
+    .catch(err => console.log('Error posting new friend:', err))
   }
 
   //////////////// EVENT HANDLERS ////////////////
@@ -61,6 +70,16 @@ export default function App() {
   //////////////// EVENT HANDLERS ////////////////
   const inputChange = (name, value) => {
     // 🔥 STEP 10- RUN VALIDATION WITH YUP
+    yup.reach(schema, name)
+    .validate(value)
+    .then(() => setFormErrors({
+      ...formErrors,
+      [name]: ''
+    }))
+    .catch(err => setFormErrors({
+      ...formErrors,
+      [name]: err.errors[0]
+    }))
     setFormValues({
       ...formValues,
       [name]: value // NOT AN ARRAY
@@ -68,14 +87,26 @@ export default function App() {
   }
 
   const formSubmit = () => {
+    const hobbies = []
+    Object.keys(formValues)
+    .filter(key => key == 'reading' || key == 'hiking' || key == 'coding')
+    .forEach(key => {
+      const value = formValues[key]
+      if(value) {
+        hobbies.push(key)
+      }
+    })
     const newFriend = {
       username: formValues.username.trim(),
       email: formValues.email.trim(),
       role: formValues.role.trim(),
       civil: formValues.civil.trim(),
+      hobbies,
       // 🔥 STEP 7- WHAT ABOUT HOBBIES?
     }
     // 🔥 STEP 8- POST NEW FRIEND USING HELPER
+    postNewFriend(newFriend)
+    setFormValues(initialFormValues)
   }
 
   //////////////// SIDE EFFECTS ////////////////
@@ -87,7 +118,11 @@ export default function App() {
 
   useEffect(() => {
     // 🔥 STEP 9- ADJUST THE STATUS OF `disabled` EVERY TIME `formValues` CHANGES
-  }, [])
+
+    // If the form is valid then enable the submit button, otherwise disable
+    schema.isValid(formValues)
+    .then(valid => setDisabled(!valid))
+  }, [formValues])
 
   return (
     <div className='container'>
